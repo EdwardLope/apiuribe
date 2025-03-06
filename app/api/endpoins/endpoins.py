@@ -35,14 +35,12 @@ def guardarPoveedor(datosPoveedor):
 def guardarLogistica(datosLogistica):
     try:
         Logistica(
-            nombreEncargado = Column(String(50))
-            correoEncargado = Column(String(50))  
-            contactoEncargado = Column(String(50))  
-            fechaEnvio = Column(Date)
-            Descripcion = Column(String(50))
-
-
-         )
+            nombreEncargado=datosLogistica.nombreEncargado,
+            correoEncargado=datosLogistica.correoEncargado,
+            contactoEncargado=datosLogistica.contactoEncargado,
+            fechaEnvio=datosLogistica.fechaEnvio,
+            Descripcion=datosLogistica.Descripcion
+        )
         
 
     except Exception as error:

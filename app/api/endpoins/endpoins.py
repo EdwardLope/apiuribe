@@ -53,16 +53,23 @@ def guardarPoveedor(datosPoveedor:PoveedorDTO,database:Session=Depends(conectarC
         raise HTTPException(status_code=400,detail=("tenemos un error {error}"))
 
 
-def guardarLogistica(datosLogistica:LogisticaDTO):
+
+@rutas.post("/logistica",response_model=LogisticaDTOEnvio,summary="servicio para guardar logistica en la base de datos ")
+
+def guardarLogistica(datosLogistica:LogisticaDTO,database:Session=Depends(conectarConBD)):
     try:
-        Logistica(
+        logisticaAGuardar=Logistica(
             nombreEncargado=datosLogistica.nombreEncargado,
             correoEncargado=datosLogistica.correoEncargado,
             contactoEncargado=datosLogistica.contactoEncargado,
             fechaEnvio=datosLogistica.fechaEnvio,
             Descripcion=datosLogistica.Descripcion
         )
-        
-
+        database.add()
+        database.commit()
+        database.refresh(logisticaAGuardar)
+        return logisticaAGuardar
+    
     except Exception as error:
-        pass 
+        database.rollback()
+        raise HTTPException(status_code=400,detail=("tenemos un error {error}"))

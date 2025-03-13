@@ -51,8 +51,23 @@ def guardarPoveedor(datosPoveedor:PoveedorDTO,database:Session=Depends(conectarC
     except Exception as error:
         database.rollback()
         raise HTTPException(status_code=400,detail=("tenemos un error {error}"))
+    
+#rutina para consultar las rutinas
+
+@rutas.get("/proveedor",response_model=list(PoveedorDTOEnvio),summary=("servicio para consultar los proveedores"))
+def buscarProveedores(database:Session=Depends(conectarConBD)):
+
+    try:
+
+        Poveedor=database.query(Poveedor).all()
+        return Poveedor
 
 
+        
+    except Exception as error:
+        database.rollback()
+        raise HTTPException(status_code=400,detail=("tenemos un error {error}"))
+    
 
 @rutas.post("/logistica",response_model=LogisticaDTOEnvio,summary="servicio para guardar logistica en la base de datos ")
 
@@ -70,6 +85,20 @@ def guardarLogistica(datosLogistica:LogisticaDTO,database:Session=Depends(conect
         database.refresh(logisticaAGuardar)
         return logisticaAGuardar
     
+    except Exception as error:
+        database.rollback()
+        raise HTTPException(status_code=400,detail=("tenemos un error {error}"))
+    
+@rutas.get("/logistica",response_model=list(PoveedorDTOEnvio),summary=("servicio para consultar logistica"))
+def buscarProveedores(database:Session=Depends(conectarConBD)):
+
+    try:
+
+        Logistica=database.query(Logistica).all()
+        return Logistica
+
+
+        
     except Exception as error:
         database.rollback()
         raise HTTPException(status_code=400,detail=("tenemos un error {error}"))

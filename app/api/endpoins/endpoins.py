@@ -3,34 +3,28 @@ from sqlalchemy.orm import Session
 from typing import List
 from fastapi.params import Depends
 
-from app.api.DTO.dtos import PoveedorDTO,PoveedorDTOEnvio,LogisticaDTO,LogisticaDTOEnvio
-from app.api.models.tablas import Poveedor,Logistica
-
+from app.api.DTO.dtos import PoveedorDTO, PoveedorDTOEnvio, LogisticaDTO, LogisticaDTOEnvio
+from app.api.models.tablas import Poveedor, Logistica
 from app.database.connection import SessionLocal, engine
 
-rutas=APIRouter()
+rutas = APIRouter()
 
-#Rutinas para conectarse a la bese de datos 
-
-def conectarConBD ():
+# Rutina para conectarse a la base de datos
+def conectarConBD():
     try:
-
-        baseDatos=SessionLocal()
+        baseDatos = SessionLocal()
         yield baseDatos
-
     except Exception as error:
-        baseDatos.roback()
+        baseDatos.rollback()
         raise error
-
     finally:
         baseDatos.close()
 
-#Rutina para construir servicion wed
-@rutas.post("/proveedor",response_model=PoveedorDTOEnvio,summary="servicio para guardar un proveedor en la base de datos ")
-
-def guardarPoveedor(datosPoveedor:PoveedorDTO,database:Session=Depends(conectarConBD)):
+# Rutina para construir servicio web
+@rutas.post("/proveedor", response_model=PoveedorDTOEnvio, summary="servicio para guardar un proveedor en la base de datos")
+def guardarPoveedor(datosPoveedor: PoveedorDTO, database: Session = Depends(conectarConBD)):
     try:
-        proveedorAGuardar=Poveedor(
+        proveedorAGuardar = Poveedor(
             nombres=datosPoveedor.nombres,
             documento=datosPoveedor.documento,
             Direccion=datosPoveedor.Direccion,
@@ -46,59 +40,45 @@ def guardarPoveedor(datosPoveedor:PoveedorDTO,database:Session=Depends(conectarC
         database.commit()
         database.refresh(proveedorAGuardar)
         return proveedorAGuardar
-    
-
     except Exception as error:
         database.rollback()
-        raise HTTPException(status_code=400,detail=("tenemos un error {error}"))
-    
-#rutina para consultar las rutinas
+        raise HTTPException(status_code=400, detail=f"Tenemos un error: {error}")
 
-@rutas.get("/proveedor",response_model=list(PoveedorDTOEnvio),summary=("servicio para consultar los proveedores"))
-def buscarProveedores(database:Session=Depends(conectarConBD)):
-
+# Ruta para consultar proveedores
+@rutas.get("/proveedor", response_model=List[PoveedorDTOEnvio], summary="servicio para consultar los proveedores")
+def buscarProveedores(database: Session = Depends(conectarConBD)):
     try:
-
-        Poveedor=database.query(Poveedor).all()
-        return Poveedor
-
-
-        
+        proveedores = database.query(Poveedor).all()
+        return proveedores
     except Exception as error:
         database.rollback()
-        raise HTTPException(status_code=400,detail=("tenemos un error {error}"))
-    
+        raise HTTPException(status_code=400, detail=f"Tenemos un error: {error}")
 
-@rutas.post("/logistica",response_model=LogisticaDTOEnvio,summary="servicio para guardar logistica en la base de datos ")
-
-def guardarLogistica(datosLogistica:LogisticaDTO,database:Session=Depends(conectarConBD)):
+# Ruta para guardar logística
+@rutas.post("/logistica", response_model=LogisticaDTOEnvio, summary="servicio para guardar logística en la base de datos")
+def guardarLogistica(datosLogistica: LogisticaDTO, database: Session = Depends(conectarConBD)):
     try:
-        logisticaAGuardar=Logistica(
+        logisticaAGuardar = Logistica(
             nombreEncargado=datosLogistica.nombreEncargado,
             correoEncargado=datosLogistica.correoEncargado,
             contactoEncargado=datosLogistica.contactoEncargado,
             fechaEnvio=datosLogistica.fechaEnvio,
             Descripcion=datosLogistica.Descripcion
         )
-        database.add()
+        database.add(logisticaAGuardar)
         database.commit()
         database.refresh(logisticaAGuardar)
         return logisticaAGuardar
-    
     except Exception as error:
         database.rollback()
-        raise HTTPException(status_code=400,detail=("tenemos un error {error}"))
-    
-@rutas.get("/logistica",response_model=list(PoveedorDTOEnvio),summary=("servicio para consultar logistica"))
-def buscarProveedores(database:Session=Depends(conectarConBD)):
+        raise HTTPException(status_code=400, detail=f"Tenemos un error: {error}")
 
+# Ruta para consultar logística
+@rutas.get("/logistica", response_model=List[LogisticaDTOEnvio], summary="servicio para consultar logística")
+def buscarLogistica(database: Session = Depends(conectarConBD)):
     try:
-
-        Logistica=database.query(Logistica).all()
-        return Logistica
-
-
-        
+        logistica = database.query(Logistica).all()
+        return logistica
     except Exception as error:
         database.rollback()
-        raise HTTPException(status_code=400,detail=("tenemos un error {error}"))
+        raise HTTPException(status_code=400, detail=f"Tenemos un error: {error}")
